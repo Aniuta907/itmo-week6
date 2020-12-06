@@ -19,7 +19,7 @@ app.get('/login/', (req, res) => {
 
 app.get('/code/', (req, res) => {
 
-  const  reader = createReadStream(import.meta.url.substring(8))
+  const  reader = createReadStream(import.meta.url.substring(10))
   reader.on('data', function (chunk) { 
     res.send(chunk.toString()); 
   }); 
