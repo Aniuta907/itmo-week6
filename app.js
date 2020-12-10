@@ -1,4 +1,4 @@
-export default (express, bodyParser, createReadStream, crypto, http) => {
+export default (express, bodyParser, createReadStream, crypto, http, connect) => {
     const app = express();
     
     app.use((req, res, next) => {
@@ -65,10 +65,17 @@ app.post('/req/', (req, res) => {
 
 })
 
+app.post('/insert/', async (req, res) => {
+  const { login, password, URL} = req.body
+  const conn = await connect(URL, {newUrlParser: true, useUnifiedTopology:true})
+  const db = conn.db()
+  const result = await db.collection('users').insertOne({login, password})
+  res.send(`${login} ${password} ${URL}`)
+})
 
 app.get('/req/', (req, res) => {
     
-    http.get( req.query.addr, (resFrom) => {
+  http.get( req.query.addr, (resFrom) => {
   const { statusCode } = resFrom;
   let error;
 
