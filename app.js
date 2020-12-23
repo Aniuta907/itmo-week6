@@ -1,4 +1,4 @@
-export default (express, bodyParser, createReadStream, crypto, http, connect, writeFileSync) => {
+export default (express, bodyParser, createReadStream, crypto, http, connect, writeFileSync, puppeteer) => {
     const app = express();
     
     app.use((req, res, next) => {
@@ -12,50 +12,16 @@ app.get('/login/', (req, res) => {
   res.send('itmo286135');
 })
 
-app.use(bodyParser.json()); 
-app.set('view engine','pug');
-
-app.get('/wordpress/wp-json/wp/v2/posts/1', (req,res) => {
-  res.json({
-    id: 1,
-    title: {rendered: 'itmo286135'}
-})
-})
-
-app.post('/render/', (req, res) => {
-  const {random2, random3} = req.body
-
-  http.get( req.query.addr,{headers: {
-    'Access-Control-Allow-Origin':'*',
-    'Access-Control-Allow-Methods':'GET,POST,PUT,PATCH,OPTIONS,DELETE'
-  }}, (resFrom) => {
-    const { statusCode } = resFrom;
-    let error;
-
-    if (statusCode !== 200) {
-      error = new Error('Request Failed.\n' +
-      `Status Code: ${statusCode}`);
-      resFrom.resume();
-      return;
-    } 
-
-    resFrom.setEncoding('utf8');
-    let rawData = '';
-    resFrom.on('data', (chunk) => { rawData += chunk; });
-    resFrom.on('end', () => {
-      try {
-        writeFileSync('views/template.pug', rawData, function (err) {
-          if (err) throw err;
-          console.log('Saved!');
-        }); 
-        res.render('template.pug', {random2, random3})
-      } catch (e) {
-        res.status(500)
-      }
-    });
-      }).on('error', (e) => {
-      res.status(500)
-      }).end();
+app.get('/test/', async (req,res) => {
+  const URL = req.query.URL
+  const browser = await puppeteer.launch({headless: true, args: ['--no-sandbox',  '--disable-setuid-sandbox']})
+  const page = await browser.newPage();
+  await page.goto(URL)
+  await page.waitForSelector('#bt')
+  await page.click('#bt')
+  const result = await page.$eval('#inp', el => el.value)
+  browser.close()
+  res.send(result)
 })
 
 app.all('*', function( req, res) {
