@@ -12,6 +12,8 @@ app.get('/login/', (req, res) => {
   res.send('itmo286135');
 })
 
+app.use(bodyParser.json()); 
+
 app.get('/test/', async (req,res) => {
   const URL = req.query.URL
   const browser = await puppeteer.launch({headless: true, args: ['--no-sandbox',  '--disable-setuid-sandbox']})
